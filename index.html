@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge浏览器起始页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* 添加这一行使内容垂直居中 */
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+            margin-top: -5vh; /* 稍微向上移动一点 */
+        }
+        
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -2;
+            transition: background-image 1s ease-in-out;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .search-container {
+            width: 100%;
+            max-width: 650px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 10px 18px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 50px;
+        }
+        
+        .search-bar:hover, .search-bar:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-engine-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            margin-right: 10px;
+        }
+        
+        .search-engine-toggle:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-engine-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 15px;
+            padding: 6px 0;
+            color: #333;
+        }
+        
+        .search-input::placeholder {
+            color: #888;
+        }
+        
+        .search-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-button:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-button i {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .quick-access {
+            width: 100%;
+            max-width: 650px;
+            transition: all 0.3s ease;
+        }
+        
+        .quick-access.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+        }
+        
+        .quick-access-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .quick-access-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .apps-grid.multi-row {
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: auto auto;
+        }
+        
+        .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .app-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+        
+        .app-item:hover .app-icon {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .app-icon img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+        
+        .app-name {
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 500;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .app-name.hidden {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .context-menu, .wallpaper-menu {
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            z-index: 1000;
+            min-width: 200px;
+            display: none;
+        }
+        
+        .context-menu-item, .wallpaper-menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .context-menu-item:hover, .wallpaper-menu-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .context-menu-item i, .wallpaper-menu-item i {
+            margin-right: 10px;
+            font-size: 16px;
+            color: #555;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .context-menu-divider, .wallpaper-menu-divider {
+            height: 1px;
+            background: #eee;
+            margin: 5px 0;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            z-index: 1001;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-engine-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 10px 0;
+            z-index: 100;
+            display: none;
+            min-width: 180px;
+            margin-top: 5px;
+        }
+        
+        .search-engine-option {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .search-engine-option:hover {
+            background: #f5f5f5;
+        }
+        
+        .search-engine-option i, .search-engine-option svg {
+            margin-right: 10px;
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .search-engine-option.active {
+            background: #f0f5ff;
+            color: #1a73e8;
+        }
+        
+        .search-engine-option.active i {
+            color: #1a73e8;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-input:focus {
+            border-color: #4285f4;
+            outline: none;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .modal-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-button.primary {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .modal-button.primary:hover {
+            background: #3367d6;
+        }
+        
+        .modal-button.secondary {
+            background: #f1f3f4;
+            color: #333;
+        }
+        
+        .modal-button.secondary:hover {
+            background: #e8eaed;
+        }
+        
+        @media (max-width: 768px) {
+            .apps-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .apps-grid.multi-row {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .app-icon {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .apps-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .apps-grid.multi-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="background" id="background"></div>
+    <div class="overlay"></div>
+    
+    <div class="container">
+        <div class="search-container">
+            <div class="search-bar">
+                <div class="search-engine-toggle" id="engineToggle">
+                    <svg height="1em" viewBox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.97 7.569a.92.92 0 00-.805.863c-.013.195-.01.209.43 1.347 1 2.59 1.242 3.214 1.283 3.302.099.213.237.413.41.592.134.138.222.212.37.311.26.176.39.224 1.405.527.989.295 1.529.49 1.994.723.603.302 1.024.644 1.29 1.051.191.292.36.815.434 1.342.029.206.029.661 0 .847a2.491 2.491 0 01-.376 1.026c-.1.151-.065.126.081-.058.415-.52.838-1.408 1.054-2.213a6.728 6.728 0 00.102-3.012 6.626 6.626 0 00-3.291-4.53 104.157 104.157 0 00-1.322-.698l-.254-.133a737.941 737.941 0 01-1.575-.827c-.548-.29-.78-.406-.846-.426a1.376 1.376 0 00-.29-.045l-.093.01z" fill="#0078D7"></path>
+                        <path d="M13.164 17.24a4.385 4.385 0 00-.202.125 511.45 511.45 0 00-1.795 1.115 163.087 163.087 0 01-.989.614l-.463.288a99.198 99.198 0 01-1.502.941c-.326.2-.704.334-1.09.387-.18.024-.52.024-.7 0a2.807 2.807 0 01-1.318-.538 3.665 3.665 0 01-.543-.545 2.837 2.837 0 01-.506-1.141 2.161 2.161 0 00-.041-.182c-.008-.008.006.138.032.33.027.199.085.487.147.733.482 1.907 1.85 3.457 3.705 4.195a6.31 6.31 0 001.658.412c.22.025.844.035 1.074.017 1.054-.08 1.972-.393 2.913-.992a325.28 325.28 0 01.937-.596l.384-.244.684-.435.234-.149.009-.005.025-.017.013-.007.172-.11.597-.38c.76-.481.987-.65 1.34-.998.148-.146.37-.394.381-.425.002-.007.042-.068.088-.136a2.49 2.49 0 00.373-1.023 4.181 4.181 0 000-.847 4.336 4.336 0 00-.318-1.137c-.224-.472-.7-.9-1.383-1.245a2.972 2.972 0 00-.406-.181c-.01 0-.646.392-1.413.87a7089.171 7089.171 0 00-1.658 1.031l-.439.274z" fill="#0078D7" fill-rule="nonzero"></path>
+                        <path d="M4.003 14.946l.004 3.33.042.193c.134.604.366 1.04.77 1.445a2.701 2.701 0 001.955.814c.536 0 1-.135 1.479-.43l.703-.435.556-.346V8.003c0-2.306-.004-3.675-.012-3.782a2.734 2.734 0 00-.797-1.765c-.145-.144-.268-.24-.637-.496A1780.102 1780.102 0 015.762.362C5.406.115 5.38.098 5.271.059a.943.943 0 00-1.254.696C4.003.818 4 1.659 4 6.223v5.394H4l.003 3.329z" fill="#0078D7" fill-rule="nonzero"></path>
+                    </svg>
+                </div>
+                <input type="text" class="search-input" placeholder="搜索或输入网址">
+                <button class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <div class="search-engine-menu" id="engineMenu">
+                    <div class="search-engine-option" data-engine="baidu">
+                        <i class="fab fa-baidu" style="color: #2932E1;"></i>
+                        <span>百度</span>
+                    </div>
+                    <div class="search-engine-option" data-engine="google">
+                        <i class="fab fa-google" style="color: #4285F4;"></i>
+                        <span>Google</span>
+                    </div>
+                    <div class="search-engine-option active" data-engine="bing">
+                        <svg height="1em" viewBox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11.97 7.569a.92.92 0 00-.805.863c-.013.195-.01.209.43 1.347 1 2.59 1.242 3.214 1.283 3.302.099.213.237.413.41.592.134.138.222.212.37.311.26.176.39.224 1.405.527.989.295 1.529.49 1.994.723.603.302 1.024.644 1.29 1.051.191.292.36.815.434 1.342.029.206.029.661 0 .847a2.491 2.491 0 01-.376 1.026c-.1.151-.065.126.081-.058.415-.52.838-1.408 1.054-2.213a6.728 6.728 0 00.102-3.012 6.626 6.626 0 00-3.291-4.53 104.157 104.157 0 00-1.322-.698l-.254-.133a737.941 737.941 0 01-1.575-.827c-.548-.29-.78-.406-.846-.426a1.376 1.376 0 00-.29-.045l-.093.01z" fill="#0078D7"></path>
+                            <path d="M13.164 17.24a4.385 4.385 0 00-.202.125 511.45 511.45 0 00-1.795 1.115 163.087 163.087 0 01-.989.614l-.463.288a99.198 99.198 0 01-1.502.941c-.326.2-.704.334-1.09.387-.18.024-.52.024-.7 0a2.807 2.807 0 01-1.318-.538 3.665 3.665 0 01-.543-.545 2.837 2.837 0 01-.506-1.141 2.161 2.161 0 00-.041-.182c-.008-.008.006.138.032.33.027.199.085.487.147.733.482 1.907 1.85 3.457 3.705 4.195a6.31 6.31 0 001.658.412c.22.025.844.035 1.074.017 1.054-.08 1.972-.393 2.913-.992a325.28 325.28 0 01.937-.596l.384-.244.684-.435.234-.149.009-.005.025-.017.013-.007.172-.11.597-.38c.76-.481.987-.65 1.34-.998.148-.146.37-.394.381-.425.002-.007.042-.068.088-.136a2.49 2.49 0 00.373-1.023 4.181 4.181 0 000-.847 4.336 4.336 0 00-.318-1.137c-.224-.472-.7-.9-1.383-1.245a2.972 2.972 0 00-.406-.181c-.01 0-.646.392-1.413.87a7089.171 7089.171 0 00-1.658 1.031l-.439.274z" fill="#0078D7" fill-rule="nonzero"></path>
+                            <path d="M4.003 14.946l.004 3.33.042.193c.134.604.366 1.04.77 1.445a2.701 2.701 0 001.955.814c.536 0 1-.135 1.479-.43l.703-.435.556-.346V8.003c0-2.306-.004-3.675-.012-3.782a2.734 2.734 0 00-.797-1.765c-.145-.144-.268-.24-.637-.496A1780.102 1780.102 0 015.762.362C5.406.115 5.38.098 5.271.059a.943.943 0 00-1.254.696C4.003.818 4 1.659 4 6.223v5.394H4l.003 3.329z" fill="#0078D7" fill-rule="nonzero"></path>
+                        </svg>
+                        <span>Bing</span>
+                    </div>
+                    <div class="search-engine-option" data-engine="duckduckgo">
+                        <i class="fas fa-search" style="color: #DE5833;"></i>
+                        <span>DuckDuckGo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-access" id="quickAccess">
+            <div class="quick-access-header">
+                <h2 class="quick-access-title"></h2>
+            </div>
+            
+            <div class="apps-grid" id="appsGrid"></div>
+        </div>
+    </div>
+
+    <input type="file" id="localFileInput" class="file-input" accept="image/*">
+    <input type="file" id="iconFileInput" class="file-input" accept="image/*">
+
+    <div class="toast" id="toast"></div>
+
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="addAppItem">
+            <i class="fas fa-plus"></i>
+            <span>添加快捷方式</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" id="editAppItem">
+            <i class="fas fa-edit"></i>
+            <span>编辑此快捷方式</span>
+        </div>
+        <div class="context-menu-item" id="changeIconItem">
+            <i class="fas fa-image"></i>
+            <span>更改图标</span>
+        </div>
+        <div class="context-menu-item" id="deleteAppItem">
+            <i class="fas fa-trash"></i>
+            <span>删除此快捷方式</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" id="toggleNamesItem">
+            <i class="fas fa-eye"></i>
+            <span>隐藏图标名称</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" id="manageAppsItem">
+            <i class="fas fa-cog"></i>
+            <span>管理所有快捷方式</span>
+        </div>
+    </div>
+
+    <div class="wallpaper-menu" id="wallpaperMenu">
+        <div class="wallpaper-menu-item" id="prevWallpaper">
+            <i class="fas fa-arrow-left"></i>
+            <span>上一张壁纸</span>
+        </div>
+        <div class="wallpaper-menu-item" id="nextWallpaper">
+            <i class="fas fa-arrow-right"></i>
+            <span>下一张壁纸</span>
+        </div>
+        <div class="wallpaper-menu-divider"></div>
+        <div class="wallpaper-menu-item" id="saveWallpaper">
+            <i class="fas fa-download"></i>
+            <span>保存图片</span>
+        </div>
+        <div class="wallpaper-menu-item" id="useUrlWallpaper">
+            <i class="fas fa-link"></i>
+            <span>使用图片URL</span>
+        </div>
+    </div>
+
+    <div class="modal" id="iconModal">
+        <div class="modal-content">
+            <h3 class="modal-title">选择图标类型</h3>
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="useIconUrl">使用图标URL</button>
+                <button class="modal-button secondary" id="useCustomIcon">使用自定义图片</button>
+                <button class="modal-button secondary" id="cancelIconSelect">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="iconUrlModal">
+        <div class="modal-content">
+            <h3 class="modal-title">输入图标URL</h3>
+            <input type="text" class="modal-input" id="iconUrlInput" placeholder="请输入图标图片网址">
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="cancelIconUrl">取消</button>
+                <button class="modal-button primary" id="confirmIconUrl">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="urlWallpaperModal">
+        <div class="modal-content">
+            <h3 class="modal-title">输入图片网址</h3>
+            <input type="text" class="modal-input" id="wallpaperUrlInput" placeholder="请输入图片网址">
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="cancelUrlWallpaper">取消</button>
+                <button class="modal-button primary" id="confirmUrlWallpaper">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 应用数据
+        const defaultApps = [
+            { id: 1, name: '抖音', icon: 'fab fa-tiktok', color: '#000000', url: 'https://www.douyin.com', customIcon: null },
+            { id: 2, name: '哔哩哔哩', icon: 'fab fa-bilibili', color: '#FB7299', url: 'https://www.bilibili.com', customIcon: null },
+            { id: 3, name: '豆包AI', icon: 'fas fa-robot', color: '#6C47FF', url: 'https://www.doubao.com', customIcon: null },
+            { id: 4, name: '翻译', icon: 'fas fa-language', color: '#4285F4', url: 'https://translate.google.com', customIcon: null },
+            { id: 5, name: '邮箱', icon: 'fas fa-envelope', color: '#EA4335', url: 'https://mail.google.com', customIcon: null },
+            { id: 6, name: 'GitHub', icon: 'fab fa-github', color: '#333333', url: 'https://github.com', customIcon: null },
+            { id: 7, name: '知乎', icon: 'fab fa-zhihu', color: '#0084FF', url: 'https://www.zhihu.com', customIcon: null }
+        ];
+
+        // 搜索引擎配置
+        const searchEngines = {
+            baidu: { 
+                name: '百度', 
+                url: 'https://www.baidu.com/s?wd=',
+                icon: 'fab fa-baidu',
+                color: '#2932E1'
+            },
+            google: { 
+                name: 'Google', 
+                url: 'https://www.google.com/search?q=',
+                icon: 'fab fa-google',
+                color: '#4285F4'
+            },
+            bing: { 
+                name: 'Bing', 
+                url: 'https://www.bing.com/search?q=',
+                icon: 'svg',
+                color: '#0078D7'
+            },
+            duckduckgo: { 
+                name: 'DuckDuckGo', 
+                url: 'https://duckduckgo.com/?q=',
+                icon: 'fas fa-search',
+                color: '#DE5833'
+            }
+        };
+        
+        // 状态管理
+        let apps = JSON.parse(localStorage.getItem('edgeStartApps')) || defaultApps;
+        let currentEngine = localStorage.getItem('edgeStartEngine') || 'bing';
+        let selectedAppId = null;
+        let currentWallpaperIndex = parseInt(localStorage.getItem('currentWallpaperIndex')) || 0;
+        let currentWallpaperUrl = localStorage.getItem('currentWallpaperUrl') || '';
+        let showIconNames = localStorage.getItem('showIconNames') !== 'false';
+        
+        // DOM元素
+        const appsGrid = document.getElementById('appsGrid');
+        const contextMenu = document.getElementById('contextMenu');
+        const wallpaperMenu = document.getElementById('wallpaperMenu');
+        const engineToggle = document.getElementById('engineToggle');
+        const engineMenu = document.getElementById('engineMenu');
+        const searchInput = document.querySelector('.search-input');
+        const searchButton = document.querySelector('.search-button');
+        const background = document.getElementById('background');
+        const localFileInput = document.getElementById('localFileInput');
+        const iconFileInput = document.getElementById('iconFileInput');
+        const toast = document.getElementById('toast');
+        const iconModal = document.getElementById('iconModal');
+        const iconUrlModal = document.getElementById('iconUrlModal');
+        const iconUrlInput = document.getElementById('iconUrlInput');
+        const toggleNamesItem = document.getElementById('toggleNamesItem');
+        const urlWallpaperModal = document.getElementById('urlWallpaperModal');
+        const wallpaperUrlInput = document.getElementById('wallpaperUrlInput');
+        const quickAccess = document.getElementById('quickAccess');
+
+        // 工具函数
+        function showToast(message, duration = 2000) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        function getRandomColor() {
+            const colors = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#6C47FF', '#FF6D00', '#46BDC6', '#7BAAF9'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function saveApps() {
+            localStorage.setItem('edgeStartApps', JSON.stringify(apps));
+        }
+
+        // 壁纸功能
+        async function fetchBingWallpaper(index = 0) {
+            try {
+                const response = await fetch(`https://bing.biturl.top/?resolution=1920&format=json&index=${index}&mkt=zh-CN`);
+                const data = await response.json();
+                
+                background.style.backgroundImage = `url(${data.url})`;
+                currentWallpaperUrl = data.url;
+                
+                currentWallpaperIndex = index;
+                localStorage.setItem('currentWallpaperIndex', currentWallpaperIndex);
+                localStorage.setItem('currentWallpaperUrl', currentWallpaperUrl);
+                
+                localStorage.setItem('bingWallpaperData', JSON.stringify({
+                    url: data.url,
+                    title: data.title,
+                    copyright: data.copyright,
+                    date: new Date().toDateString()
+                }));
+            } catch (error) {
+                console.error('获取必应壁纸失败:', error);
+                
+                const savedData = localStorage.getItem('bingWallpaperData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    background.style.backgroundImage = `url(${data.url})`;
+                    currentWallpaperUrl = data.url;
+                } else {
+                    background.style.backgroundImage = 'url(https://bing.biturl.top/?resolution=1920&format=image&index=0&mkt=zh-CN)';
+                    currentWallpaperUrl = 'https://bing.biturl.top/?resolution=1920&format=image&index=0&mkt=zh-CN';
+                }
+            }
+        }
+
+        function prevWallpaper() {
+            if (currentWallpaperIndex > 0) {
+                fetchBingWallpaper(currentWallpaperIndex - 1);
+            } else {
+                fetchBingWallpaper(7);
+            }
+        }
+
+        function nextWallpaper() {
+            fetchBingWallpaper(currentWallpaperIndex + 1);
+        }
+
+        function saveWallpaper() {
+            if (!currentWallpaperUrl) {
+                showToast('没有可保存的壁纸');
+                return;
+            }
+            
+            try {
+                const link = document.createElement('a');
+                link.href = currentWallpaperUrl;
+                
+                const urlParts = currentWallpaperUrl.split('/');
+                let filename = 'bing_wallpaper.jpg';
+                
+                for (let part of urlParts) {
+                    if (part.includes('OHR.') || part.includes('_ZH-CN')) {
+                        filename = part.split('?')[0] + '.jpg';
+                        break;
+                    }
+                }
+                
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast('壁纸保存成功');
+            } catch (error) {
+                console.error('保存壁纸失败:', error);
+                showToast('保存壁纸失败');
+            }
+        }
+
+        function useUrlWallpaper() {
+            urlWallpaperModal.style.display = 'flex';
+            wallpaperUrlInput.value = '';
+        }
+
+        function handleUrlWallpaper() {
+            const url = wallpaperUrlInput.value.trim();
+            if (!url) {
+                showToast('请输入图片网址');
+                return;
+            }
+            
+            if (!url.startsWith('http')) {
+                showToast('请输入有效的图片网址');
+                return;
+            }
+            
+            background.style.backgroundImage = `url(${url})`;
+            currentWallpaperUrl = url;
+            
+            localStorage.setItem('urlWallpaper', url);
+            localStorage.setItem('wallpaperType', 'url');
+            
+            showToast('网址壁纸设置成功');
+            urlWallpaperModal.style.display = 'none';
+        }
+
+        // 应用管理功能
+        function renderApps() {
+            appsGrid.innerHTML = '';
+            
+            if (apps.length > 5) {
+                appsGrid.classList.add('multi-row');
+            } else {
+                appsGrid.classList.remove('multi-row');
+            }
+            
+            apps.forEach(app => {
+                const appElement = document.createElement('div');
+                appElement.className = 'app-item';
+                appElement.setAttribute('data-id', app.id);
+                
+                let iconHTML = '';
+                if (app.customIcon) {
+                    iconHTML = `<img src="${app.customIcon}" alt="${app.name}">`;
+                } else if (app.icon) {
+                    iconHTML = `<i class="${app.icon}" style="color: white; font-size: 24px;"></i>`;
+                } else {
+                    iconHTML = `<i class="fas fa-globe" style="color: white; font-size: 24px;"></i>`;
+                }
+                
+                appElement.innerHTML = `
+                    <div class="app-icon" style="background: ${app.color}">
+                        ${iconHTML}
+                    </div>
+                    <span class="app-name ${showIconNames ? '' : 'hidden'}">${app.name}</span>
+                `;
+                
+                appElement.addEventListener('click', () => {
+                    window.open(app.url, '_blank');
+                });
+                
+                appElement.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    selectedAppId = app.id;
+                    showContextMenu(e.clientX, e.clientY);
+                });
+                
+                appsGrid.appendChild(appElement);
+            });
+        }
+
+        function addNewApp() {
+            const name = prompt('请输入应用名称:');
+            if (!name) return;
+            
+            const url = prompt('请输入应用网址:');
+            if (!url) return;
+            
+            const newApp = {
+                id: Date.now(),
+                name: name,
+                icon: 'fas fa-globe',
+                color: getRandomColor(),
+                url: url,
+                customIcon: null
+            };
+            
+            apps.push(newApp);
+            saveApps();
+            renderApps();
+        }
+
+        function editApp(id) {
+            const app = apps.find(app => app.id === id);
+            if (!app) return;
+            
+            const name = prompt('请输入新的应用名称:', app.name);
+            if (!name) return;
+            
+            const url = prompt('请输入新的应用网址:', app.url);
+            if (!url) return;
+            
+            app.name = name;
+            app.url = url;
+            
+            saveApps();
+            renderApps();
+        }
+
+        function deleteApp(id) {
+            apps = apps.filter(app => app.id !== id);
+            saveApps();
+            renderApps();
+        }
+
+        function manageApps() {
+            let appList = "当前快捷方式:\n\n";
+            apps.forEach((app, index) => {
+                appList += `${index + 1}. ${app.name} (${app.url})\n`;
+            });
+            
+            const action = prompt(`${appList}\n\n输入要删除的应用编号，或输入"添加"来添加新应用:`);
+            
+            if (action === "添加") {
+                addNewApp();
+            } else if (action && !isNaN(action)) {
+                const index = parseInt(action) - 1;
+                if (index >= 0 && index < apps.length) {
+                    const confirmDelete = confirm(`确定要删除 "${apps[index].name}" 吗?`);
+                    if (confirmDelete) {
+                        deleteApp(apps[index].id);
+                    }
+                }
+            }
+        }
+
+        // 图标管理
+        function changeIcon() {
+            if (!selectedAppId) return;
+            iconModal.style.display = 'flex';
+        }
+
+        function handleCustomIconSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                showToast('请选择图片文件');
+                return;
+            }
+            
+            const fileURL = URL.createObjectURL(file);
+            
+            const app = apps.find(app => app.id === selectedAppId);
+            if (app) {
+                app.customIcon = fileURL;
+                app.icon = '';
+                saveApps();
+                renderApps();
+                showToast('图标已更新');
+            }
+            
+            event.target.value = '';
+        }
+
+        function handleIconUrl() {
+            const url = iconUrlInput.value.trim();
+            if (!url) {
+                showToast('请输入图标网址');
+                return;
+            }
+            
+            if (!url.startsWith('http')) {
+                showToast('请输入有效的图标网址');
+                return;
+            }
+            
+            const app = apps.find(app => app.id === selectedAppId);
+            if (app) {
+                app.customIcon = url;
+                app.icon = '';
+                saveApps();
+                renderApps();
+                showToast('图标已更新');
+                iconUrlModal.style.display = 'none';
+            }
+        }
+
+        // 显示/隐藏功能
+        function toggleIconNames() {
+            showIconNames = !showIconNames;
+            localStorage.setItem('showIconNames', showIconNames);
+            updateIconNamesVisibility();
+            updateToggleNamesText();
+        }
+
+        function updateIconNamesVisibility() {
+            const appNames = document.querySelectorAll('.app-name');
+            appNames.forEach(name => {
+                if (showIconNames) {
+                    name.classList.remove('hidden');
+                } else {
+                    name.classList.add('hidden');
+                }
+            });
+        }
+
+        function updateToggleNamesText() {
+            const text = showIconNames ? '隐藏图标名称' : '显示图标名称';
+            toggleNamesItem.querySelector('span').textContent = text;
+            toggleNamesItem.querySelector('i').className = showIconNames ? 'fas fa-eye' : 'fas fa-eye-slash';
+        }
+
+        // 菜单管理
+        function showContextMenu(x, y) {
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+            
+            wallpaperMenu.style.display = 'none';
+        }
+
+        function showWallpaperMenu(x, y) {
+            wallpaperMenu.style.display = 'block';
+            wallpaperMenu.style.left = `${x}px`;
+            wallpaperMenu.style.top = `${y}px`;
+            
+            contextMenu.style.display = 'none';
+        }
+
+        function hideAllMenus() {
+            contextMenu.style.display = 'none';
+            wallpaperMenu.style.display = 'none';
+        }
+
+        // 搜索功能
+        function updateSearchEngine(engine) {
+            currentEngine = engine;
+            localStorage.setItem('edgeStartEngine', engine);
+            
+            const engineData = searchEngines[engine];
+            
+            if (engine === 'bing') {
+                engineToggle.innerHTML = `<svg height="1em" viewBox="0 0 24 24" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M11.97 7.569a.92.92 0 00-.805.863c-.013.195-.01.209.43 1.347 1 2.59 1.242 3.214 1.283 3.302.099.213.237.413.41.592.134.138.222.212.37.311.26.176.39.224 1.405.527.989.295 1.529.49 1.994.723.603.302 1.024.644 1.29 1.051.191.292.36.815.434 1.342.029.206.029.661 0 .847a2.491 2.491 0 01-.376 1.026c-.1.151-.065.126.081-.058.415-.52.838-1.408 1.054-2.213a6.728 6.728 0 00.102-3.012 6.626 6.626 0 00-3.291-4.53 104.157 104.157 0 00-1.322-.698l-.254-.133a737.941 737.941 0 01-1.575-.827c-.548-.29-.78-.406-.846-.426a1.376 1.376 0 00-.29-.045l-.093.01z" fill="${engineData.color}"></path><path d="M13.164 17.24a4.385 4.385 0 00-.202.125 511.45 511.45 0 00-1.795 1.115 163.087 163.087 0 01-.989.614l-.463.288a99.198 99.198 0 01-1.502.941c-.326.2-.704.334-1.09.387-.18.024-.52.024-.7 0a2.807 2.807 0 01-1.318-.538 3.665 3.665 0 01-.543-.545 2.837 2.837 0 01-.506-1.141 2.161 2.161 0 00-.041-.182c-.008-.008.006.138.032.33.027.199.085.487.147.733.482 1.907 1.85 3.457 3.705 4.195a6.31 6.31 0 001.658.412c.22.025.844.035 1.074.017 1.054-.08 1.972-.393 2.913-.992a325.28 325.28 0 01.937-.596l.384-.244.684-.435.234-.149.009-.005.025-.017.013-.007.172-.11.597-.38c.76-.481.987-.65 1.34-.998.148-.146.37-.394.381-.425.002-.007.042-.068.088-.136a2.49 2.49 0 00.373-1.023 4.181 4.181 0 000-.847 4.336 4.336 0 00-.318-1.137c-.224-.472-.7-.9-1.383-1.245a2.972 2.972 0 00-.406-.181c-.01 0-.646.392-1.413.87a7089.171 7089.171 0 00-1.658 1.031l-.439.274z" fill="${engineData.color}" fill-rule="nonzero"></path><path d="M4.003 14.946l.004 3.33.042.193c.134.604.366 1.04.77 1.445a2.701 2.701 0 001.955.814c.536 0 1-.135 1.479-.43l.703-.435.556-.346V8.003c0-2.306-.004-3.675-.012-3.782a2.734 2.734 0 00-.797-1.765c-.145-.144-.268-.24-.637-.496A1780.102 1780.102 0 015.762.362C5.406.115 5.38.098 5.271.059a.943.943 0 00-1.254.696C4.003.818 4 1.659 4 6.223v5.394H4l.003 3.329z" fill="${engineData.color}" fill-rule="nonzero"></path></svg>`;
+            } else {
+                engineToggle.innerHTML = `<i class="${engineData.icon}" style="color: ${engineData.color};"></i>`;
+            }
+            
+            document.querySelectorAll('.search-engine-option').forEach(option => {
+                if (option.dataset.engine === engine) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+        }
+
+        function performSearch() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+            
+            const engineData = searchEngines[currentEngine];
+            const searchUrl = engineData.url + encodeURIComponent(query);
+            window.open(searchUrl, '_blank');
+        }
+
+        function toggleSearchEngineMenu() {
+            quickAccess.classList.add('hidden');
+            engineMenu.style.display = engineMenu.style.display === 'block' ? 'none' : 'block';
+            
+            setTimeout(() => {
+                const hideMenuHandler = (e) => {
+                    if (!engineToggle.contains(e.target) && !engineMenu.contains(e.target)) {
+                        engineMenu.style.display = 'none';
+                        quickAccess.classList.remove('hidden');
+                        document.removeEventListener('click', hideMenuHandler);
+                    }
+                };
+                document.addEventListener('click', hideMenuHandler);
+            }, 10);
+        }
+
+        function handleEngineSelection(e) {
+            const option = e.target.closest('.search-engine-option');
+            if (!option) return;
+            
+            const engine = option.dataset.engine;
+            updateSearchEngine(engine);
+            engineMenu.style.display = 'none';
+            quickAccess.classList.remove('hidden');
+        }
+
+        // 区域判断
+        function isFunctionalArea(target) {
+            return target.closest('.search-container') || 
+                   target.closest('.quick-access');
+        }
+
+        // 初始化
+        function init() {
+            renderApps();
+            updateSearchEngine(currentEngine);
+            updateToggleNamesText();
+            
+            if (localStorage.getItem('wallpaperType') === 'local') {
+                const localWallpaper = localStorage.getItem('localWallpaper');
+                if (localWallpaper) {
+                    background.style.backgroundImage = `url(${localWallpaper})`;
+                    currentWallpaperUrl = localWallpaper;
+                }
+            } else if (localStorage.getItem('wallpaperType') === 'url') {
+                const urlWallpaper = localStorage.getItem('urlWallpaper');
+                if (urlWallpaper) {
+                    background.style.backgroundImage = `url(${urlWallpaper})`;
+                    currentWallpaperUrl = urlWallpaper;
+                }
+            } else {
+                fetchBingWallpaper(currentWallpaperIndex);
+            }
+            
+            // 事件监听
+            document.addEventListener('click', hideAllMenus);
+            
+            document.addEventListener('contextmenu', (e) => {
+                if (isFunctionalArea(e.target)) return;
+                e.preventDefault();
+                showWallpaperMenu(e.clientX, e.clientY);
+            });
+            
+            searchButton.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+            
+            engineToggle.addEventListener('click', toggleSearchEngineMenu);
+            engineMenu.addEventListener('click', handleEngineSelection);
+            
+            // 上下文菜单事件
+            document.getElementById('addAppItem').addEventListener('click', addNewApp);
+            document.getElementById('editAppItem').addEventListener('click', () => {
+                if (selectedAppId) editApp(selectedAppId);
+            });
+            document.getElementById('changeIconItem').addEventListener('click', changeIcon);
+            document.getElementById('deleteAppItem').addEventListener('click', () => {
+                if (selectedAppId) deleteApp(selectedAppId);
+            });
+            document.getElementById('toggleNamesItem').addEventListener('click', toggleIconNames);
+            document.getElementById('manageAppsItem').addEventListener('click', manageApps);
+            
+            // 壁纸菜单事件
+            document.getElementById('prevWallpaper').addEventListener('click', prevWallpaper);
+            document.getElementById('nextWallpaper').addEventListener('click', nextWallpaper);
+            document.getElementById('saveWallpaper').addEventListener('click', saveWallpaper);
+            document.getElementById('useUrlWallpaper').addEventListener('click', useUrlWallpaper);
+            
+            // 图标选择事件
+            localFileInput.addEventListener('change', handleCustomIconSelect);
+            iconFileInput.addEventListener('change', handleCustomIconSelect);
+            
+            document.getElementById('useIconUrl').addEventListener('click', () => {
+                iconModal.style.display = 'none';
+                iconUrlModal.style.display = 'flex';
+                iconUrlInput.value = '';
+            });
+            
+            document.getElementById('useCustomIcon').addEventListener('click', () => {
+                iconModal.style.display = 'none';
+                iconFileInput.click();
+            });
+            
+            document.getElementById('cancelIconSelect').addEventListener('click', () => {
+                iconModal.style.display = 'none';
+            });
+            
+            document.getElementById('confirmIconUrl').addEventListener('click', handleIconUrl);
+            document.getElementById('cancelIconUrl').addEventListener('click', () => {
+                iconUrlModal.style.display = 'none';
+            });
+            
+            iconUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleIconUrl();
+            });
+            
+            document.getElementById('confirmUrlWallpaper').addEventListener('click', handleUrlWallpaper);
+            document.getElementById('cancelUrlWallpaper').addEventListener('click', () => {
+                urlWallpaperModal.style.display = 'none';
+            });
+            
+            // 模态框外部点击关闭
+            [iconModal, iconUrlModal, urlWallpaperModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.style.display = 'none';
+                });
+            });
+        }
+        
+        init();
+    </script>
+</body>
+</html>
